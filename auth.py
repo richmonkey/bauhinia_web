@@ -6,6 +6,7 @@ import time
 import requests
 import urllib
 import logging
+import base64
 from datetime import datetime
 from functools import wraps
 from util import make_response
@@ -13,6 +14,7 @@ from model import code
 from model import token
 from model import user
 from authorization import create_token
+import config
 
 app = Blueprint('auth', __name__)
 rds = None
@@ -42,7 +44,13 @@ def INVALID_REFRESH_TOKEN():
     e = {"error":"非法的refresh token"}
     logging.warn("非法的refresh token")
     return make_response(400, e)
+ 
     
+def CAN_NOT_GET_TOKEN():
+    e = {"error":"获取imsdk token失败"}
+    logging.warn("获取imsdk token失败")
+    return make_response(400, e)
+   
 def create_verify_code():
     return ''.join([str(random.randint(0, 9)) for _ in range(6)])
 
@@ -135,6 +143,23 @@ def verify_code():
 
     return make_response(200, data = data)
 
+
+def login_gobelieve(uid, uname):
+    url = config.GOBELIEVE_URL + "/auth/grant"
+    obj = {"uid":uid, "user_name":uname}
+    basic = base64.b64encode(str(config.ANDROID_APP_ID) + ":" + config.ANDROID_APP_SECRET)
+    headers = {'Content-Type': 'application/json; charset=UTF-8',
+               'Authorization': 'Basic ' + basic}
+     
+    res = requests.post(url, data=json.dumps(obj), headers=headers)
+    if res.status_code != 200:
+        logging.warning("login error:%s %s", res.status_code, res.text)
+        return None
+
+    obj = json.loads(res.text)
+    return obj["data"]["token"]
+
+
 @app.route("/auth/token", methods=["POST"])
 def access_token():
     if not request.data:
@@ -154,6 +179,11 @@ def access_token():
             return INVALID_CODE()
 
     uid = user.make_uid(zone, number)
+
+    access_token = login_gobelieve(uid, "")
+    if not access_token:
+        return CAN_NOT_GET_TOKEN()
+
     u0 = user.get_user(rds, uid)
     u = user.User()
     u.uid = uid
@@ -168,17 +198,17 @@ def access_token():
         u.state = "Hey!"
     else:
         u.state = u0.state
+
     user.save_user(rds, u)
 
     tok = create_token(3600, True)
     tok['uid'] = uid
+    tok['access_token'] = access_token
 
     t = token.AccessToken(**tok)
     t.save(rds)
-    print tok
     t = token.RefreshToken(**tok)
     t.save(rds)
-    print tok
 
     return make_response(200, tok)
 
@@ -189,13 +219,20 @@ def refresh_token():
         return INVALID_PARAM()
 
     obj = json.loads(request.data)
-    tok = obj["refresh_token"]
+    refresh_token = obj["refresh_token"]
     rt = token.RefreshToken()
-    if not rt.load(rds, tok):
+    if not rt.load(rds, refresh_token):
         return INVALID_REFRESH_TOKEN()
+
+    access_token = login_gobelieve(int(rt.user_id), "")
+    if not access_token:
+        return CAN_NOT_GET_TOKEN()
 
     tok = create_token(3600, False)
     tok["refresh_token"] = obj["refresh_token"]
+    tok["access_token"] = access_token
+    tok['uid'] = rt.user_id
+
     t = token.AccessToken(**tok)
     t.user_id = rt.user_id
     t.save(rds)
