@@ -12,13 +12,9 @@ import config
 import user
 import authorization
 import download
-from fs import FS
 
 app = Flask(__name__)
 app.debug = True
-
-FS.HOST = config.FS_HOST
-FS.PORT = config.FS_PORT
 
 rds = redis.StrictRedis(host=config.REDIS_HOST, port=config.REDIS_PORT, db=config.REDIS_DB)
 auth.rds = rds
