@@ -42,7 +42,7 @@ var htmlLoyout = {
 
         html.push('<li data-uid="' + user.uid + '">');
         if (user.avatar) {
-            html.push('    <img src="' + helper.getUserAvatar(user) + '" class="avatar" alt=""/>');
+            html.push('    <img src="' + user.avatar + '" class="avatar" alt=""/>');
         } else {
             html.push('    <img src="static/images/_avatar.png" class="avatar" alt=""/>');
         }
@@ -61,6 +61,14 @@ var htmlLoyout = {
         html.push('    <div class="message ' + msg.cls + '">');
         html.push('        <div class="bubble"><p class="pre">' + msg.text + '</p>');
         html.push('           <span class="time">' + helper.toTime(msg.timestamp * 1000) + '</span>');
+
+        if (msg.ack) {
+            html.push('   <span class="ack"></span>');
+        }
+        if (msg.received) {
+            html.push('   <span class="rack"></span>');
+        }
+
         html.push('        </div>');
         html.push('    </div>');
         html.push('</li>');
@@ -73,6 +81,14 @@ var htmlLoyout = {
         html.push('        <div class="bubble"><p class="pre"><a href="' + msg.image + '" target="_blank">' +
             '<img class="image-thumb-body" src="' + msg.image + '" /></p></a>');
         html.push('           <span class="time">' + helper.toTime(msg.timestamp * 1000) + '</span>');
+
+        if (msg.ack) {
+            html.push('   <span class="ack"></span>');
+        }
+        if (msg.received) {
+            html.push('   <span class="rack"></span>');
+        }
+
         html.push('        </div>');
         html.push('    </div>');
         html.push('</li>');
@@ -87,6 +103,14 @@ var htmlLoyout = {
         html.push('     <div class="bubble">');
         html.push('       <p class="pre"><audio  controls="controls" src="' + audio_url + '"></audio></p>');
         html.push('       <span class="time">' + helper.toTime(msg.timestamp * 1000) + '</span>');
+   
+        if (msg.ack) {
+            html.push('   <span class="ack"></span>');
+        }
+        if (msg.received) {
+            html.push('   <span class="rack"></span>');
+        }
+
         html.push('     </div>');
         html.push('  </div>');
         html.push('</li>');
@@ -154,7 +178,9 @@ function appendMessage(msg) {
         time.setTime(msg.timestamp * 1000);
         m.timestamp = msg.timestamp;
     }
-    if (im.uid == msg.sender) {
+    m.ack = msg.ack;
+    m.received = msg.received;
+    if (loginUser.uid == msg.sender) {
         m.cls = "message-out";
     } else {
         m.cls = "message-in";
@@ -169,7 +195,7 @@ function appendMessage(msg) {
         m.image = msg.contentObj.image;
         process.appendImage(m);
     }
-    console.log("uid:", im.uid, " sender:", msg.sender, " receiver:", msg.receiver);
+    console.log("message sender:", msg.sender, " receiver:", msg.receiver);
 }
 
 // add message on board

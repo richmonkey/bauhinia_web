@@ -59,10 +59,12 @@ var observer = {
         process.msgTip(msg.sender);
     },
     handleMessageACK: function (msgLocalID, uid) {
+        imDB.ackMessage(uid, msgLocalID);
         process.msgACK(msgLocalID,uid);
         console.log("message ack local id:", msgLocalID, " uid:", uid);
     },
     handleMessageRemoteACK: function (msgLocalID, uid) {
+        imDB.ackMessageFromRemote(uid, msgLocalID);
         process.msgRemoteACK(msgLocalID,uid);
         console.log("message remote ack local id:", msgLocalID, " uid:", uid);
     },
