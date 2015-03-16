@@ -42,7 +42,7 @@ var htmlLoyout = {
 
         html.push('<li data-uid="' + user.uid + '">');
         if (user.avatar) {
-            html.push('    <img src="' + user.avatar + '" class="avatar" alt=""/>');
+            html.push('    <img src="' + helper.getUserAvatar(user) + '" class="avatar" alt=""/>');
         } else {
             html.push('    <img src="static/images/_avatar.png" class="avatar" alt=""/>');
         }
