@@ -9,6 +9,9 @@ import random
 import time
 import web
 import json
+import base64
+import requests
+import config
 
 rds = None
 
@@ -91,3 +94,18 @@ def create_token(expires_in, refresh_token=False):
 
     return token
 
+
+def login_gobelieve(uid, uname):
+    url = config.GOBELIEVE_URL + "/auth/grant"
+    obj = {"uid":uid, "user_name":uname}
+    basic = base64.b64encode(str(config.ANDROID_APP_ID) + ":" + config.ANDROID_APP_SECRET)
+    headers = {'Content-Type': 'application/json; charset=UTF-8',
+               'Authorization': 'Basic ' + basic}
+     
+    res = requests.post(url, data=json.dumps(obj), headers=headers)
+    if res.status_code != 200:
+        logging.warning("login error:%s %s", res.status_code, res.text)
+        return None
+
+    obj = json.loads(res.text)
+    return obj["data"]["token"]

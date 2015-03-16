@@ -82,7 +82,7 @@ var observer = {
     }
 };
 
-im = new IMService("im.yufeng.me", 13890, 0, observer, false);
+im = new IMService(observer);
 
 
 function onLoginSuccess(result) {
@@ -92,7 +92,7 @@ function onLoginSuccess(result) {
     loginUser.uid = result.uid;
     accessToken = result.access_token;
 
-    im.uid = result.uid;
+    im.accessToken = result.access_token;
     im.start();
 
     setName(loginUser.name || helper.getPhone(loginUser.uid));

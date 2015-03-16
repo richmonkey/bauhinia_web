@@ -14,6 +14,7 @@ from model import code
 from model import token
 from model import user
 from authorization import create_token
+from authorization import login_gobelieve
 import config
 
 app = Blueprint('auth', __name__)
@@ -143,21 +144,6 @@ def verify_code():
 
     return make_response(200, data = data)
 
-
-def login_gobelieve(uid, uname):
-    url = config.GOBELIEVE_URL + "/auth/grant"
-    obj = {"uid":uid, "user_name":uname}
-    basic = base64.b64encode(str(config.ANDROID_APP_ID) + ":" + config.ANDROID_APP_SECRET)
-    headers = {'Content-Type': 'application/json; charset=UTF-8',
-               'Authorization': 'Basic ' + basic}
-     
-    res = requests.post(url, data=json.dumps(obj), headers=headers)
-    if res.status_code != 200:
-        logging.warning("login error:%s %s", res.status_code, res.text)
-        return None
-
-    obj = json.loads(res.text)
-    return obj["data"]["token"]
 
 
 @app.route("/auth/token", methods=["POST"])

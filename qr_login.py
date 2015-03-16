@@ -8,6 +8,7 @@ import json
 import redis
 import authorization
 from authorization import create_token
+from authorization import login_gobelieve
 from model import token
 import config
 import logging
@@ -89,8 +90,13 @@ class QRLogin:
          
         if session.uid:
             #已经登录
+            access_token = login_gobelieve(int(session.uid), "")
+            if not access_token:
+                raise Error(404, "imsdk can't login")
+
             tok = create_token(3600, True)
             tok['uid'] = int(session.uid)
+            tok["access_token"] = access_token
             t = token.AccessToken(**tok)
             t.save(rds)
 
