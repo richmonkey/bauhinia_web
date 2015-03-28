@@ -11,3 +11,4 @@ $uwsgi --uid nobody --gid nobody --chdir $app_dir --http :6001 --gevent 1000 -M 
 
 $uwsgi --uid nobody --gid nobody --chdir $app_dir --http :6002 --gevent 1000 -M  -p 1 -w qr_login  -t 60 --max-requests 5000 --vacuum --home $home --daemonize /tmp/qr_login.log --pidfile /tmp/qr_login.pid --touch-reload /tmp/qr_login.touch
 
+$uwsgi --uid nobody --gid nobody --chdir $app_dir --http :6003 -M  -p 1 -w im --callable app --pyargv "face" -t 60 --max-requests 5000 --vacuum --home $home --daemonize /tmp/face_api.log --pidfile /tmp/face_api.pid --touch-reload /tmp/face_api.touch

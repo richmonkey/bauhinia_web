@@ -38,5 +38,15 @@ def init_logger(logger):
 log = logging.getLogger('')
 init_logger(log)
 
+if len(sys.argv) > 1 and sys.argv[1] == "face":
+    config.APP_ID = config.FACE_APP_ID
+    config.APP_KEY = config.FACE_APP_KEY
+    config.APP_SECRET = config.FACE_APP_SECRET
+else:
+    config.APP_ID = config.BAUHINIA_APP_ID
+    config.APP_KEY = config.BAUHINIA_APP_KEY
+    config.APP_SECRET = config.BAUHINIA_APP_SECRET
+
+
 if __name__ == '__main__':
     app.run(host="0.0.0.0", port=5000)

@@ -4,3 +4,4 @@
 *.pem
 .idea/
 config.py
+/*.sh
