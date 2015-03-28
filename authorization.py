@@ -95,10 +95,10 @@ def create_token(expires_in, refresh_token=False):
     return token
 
 
-def login_gobelieve(uid, uname):
+def login_gobelieve(uid, uname, appid, appsecret):
     url = config.GOBELIEVE_URL + "/auth/grant"
     obj = {"uid":uid, "user_name":uname}
-    basic = base64.b64encode(str(config.APP_ID) + ":" + config.APP_SECRET)
+    basic = base64.b64encode(str(appid) + ":" + appsecret)
     headers = {'Content-Type': 'application/json; charset=UTF-8',
                'Authorization': 'Basic ' + basic}
      

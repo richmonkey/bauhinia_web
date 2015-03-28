@@ -28,8 +28,9 @@ def platforms():
 
 
 def is_voip():
-    pos = request.base_url.find("http://voip")
-    return pos == 0
+    pos1 = request.base_url.find("http://voip")
+    pos2 = request.base_url.find("http://face")
+    return pos1 == 0 or pos2 == 0
     
 def is_ios():
     platform = platforms()

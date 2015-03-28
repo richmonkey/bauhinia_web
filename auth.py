@@ -145,7 +145,11 @@ def verify_code():
     return make_response(200, data = data)
 
 
-
+def is_voip_request():
+    pos1 = request.base_url.find("http://voip")
+    pos2 = request.base_url.find("http://face")
+    return pos1 == 0 or pos2 == 0
+    
 @app.route("/auth/token", methods=["POST"])
 def access_token():
     if not request.data:
@@ -155,8 +159,6 @@ def access_token():
     c1 = obj["code"]
     number = obj["number"]
     zone = obj["zone"]
-    apns_device_token = obj["apns_device_token"] if obj.has_key("apns_device_token") else None
-    ng_device_token = obj["ng_device_token"] if obj.has_key("ng_device_token") else None
     if is_test_number(number):
         pass
     else:
@@ -166,20 +168,18 @@ def access_token():
 
     uid = user.make_uid(zone, number)
 
-    access_token = login_gobelieve(uid, "")
+    is_voip = is_voip_request()
+    if is_voip:
+        access_token = login_gobelieve(uid, "", config.FACE_APP_ID, config.FACE_APP_SECRET)
+    else:
+        access_token = login_gobelieve(uid, "", config.BAUHINIA_APP_ID, config.BAUHINIA_APP_SECRET)
+        
     if not access_token:
         return CAN_NOT_GET_TOKEN()
 
     u0 = user.get_user(rds, uid)
     u = user.User()
     u.uid = uid
-    pos = request.base_url.find("http://voip")
-    if pos == 0:
-        u.face_apns_device_token = apns_device_token
-        u.face_ng_device_token = ng_device_token
-    else:
-        u.apns_device_token = apns_device_token
-        u.ng_device_token = ng_device_token
     if u0 is None:
         u.state = "Hey!"
     else:
@@ -210,7 +210,12 @@ def refresh_token():
     if not rt.load(rds, refresh_token):
         return INVALID_REFRESH_TOKEN()
 
-    access_token = login_gobelieve(int(rt.user_id), "")
+    is_voip = is_voip_request()
+    if is_voip:
+        access_token = login_gobelieve(int(rt.user_id), "", config.FACE_APP_ID, config.FACE_APP_SECRET)
+    else:
+        access_token = login_gobelieve(int(rt.user_id), "", config.BAUHINIA_APP_ID, config.BAUHINIA_APP_SECRET)
+        
     if not access_token:
         return CAN_NOT_GET_TOKEN()
 
