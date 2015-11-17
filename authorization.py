@@ -102,7 +102,7 @@ def login_gobelieve(uid, uname, appid, appsecret):
 
     m = md5.new(appsecret)
     secret = m.hexdigest()
-    basic = base64.b64encode(str(config.APP_ID) + ":" + secret)
+    basic = base64.b64encode(str(appid) + ":" + secret)
 
     headers = {'Content-Type': 'application/json; charset=UTF-8',
                'Authorization': 'Basic ' + basic}
