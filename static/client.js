@@ -47,26 +47,33 @@ var observer = {
             console.log("json parse exception:", e);
             return
         }
-        if (msg.sender == peer) {
+
+        var cid;
+        if (msg.sender == loginUser.uid) {
+            cid = msg.receiver;
+        } else {
+            cid = msg.sender;
+        }
+
+        if (cid == peer) {
             addMessage(msg);
         }
-        imDB.saveMessage(msg.sender, msg);
-        user = {uid : msg.sender};
+
+        imDB.saveMessage(cid, msg);
+        var user = {uid:cid};
         var inserted = userDB.addUser(user);
         if (inserted) {
             addUser(user);
         }
-        process.msgTip(msg.sender);
+        if (msg.sender != loginUser.uid) {
+            process.msgTip(cid);
+        }
     },
+
     handleMessageACK: function (msgLocalID, uid) {
         imDB.ackMessage(uid, msgLocalID);
         process.msgACK(msgLocalID,uid);
         console.log("message ack local id:", msgLocalID, " uid:", uid);
-    },
-    handleMessageRemoteACK: function (msgLocalID, uid) {
-        imDB.ackMessageFromRemote(uid, msgLocalID);
-        process.msgRemoteACK(msgLocalID,uid);
-        console.log("message remote ack local id:", msgLocalID, " uid:", uid);
     },
     handleMessageFailure: function (msgLocalID, uid) {
         console.log("message fail local id:", msgLocalID, " uid:", uid);
