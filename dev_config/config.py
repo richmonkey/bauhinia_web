@@ -4,7 +4,6 @@ REDIS_PORT=6379
 REDIS_DB=0
 
 
-
 GOBELIEVE_URL = "http://dev.api.gobelieve.io"
 
 BAUHINIA_APP_ID = 17
@@ -17,3 +16,4 @@ FACE_APP_KEY = "peNQB61YcVD0aVu2mJEBR8ccl51sroQF"
 FACE_APP_SECRET = "AEDhci9o9RMgCWcLp72G2FxT8GOWHk8N"
 
 
+IMAGE_PATH = "/tmp/images"

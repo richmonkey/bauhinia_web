@@ -10,8 +10,8 @@ import threading
 import json
 import sys
 
-URL = "http://192.168.33.10"
-#URL = "http://im.yufeng.me"
+#URL = "http://192.168.33.10"
+URL = "http://dev.gobelieve.io"
 
 url = URL + "/verify_code?"
 NUMBER = "13800000000"
@@ -99,3 +99,19 @@ print "qrcode login success"
 
 t.join()
 
+
+
+url = URL + "/images"
+f = open("data/test.jpg", "rb")
+data = f.read()
+headers = {}
+headers["Authorization"] = "Bearer " + access_token
+headers["Content-Type"] = "image/jpeg"
+r = requests.post(url, data=data, headers = headers)
+assert(r.status_code == 200)
+image_url = json.loads(r.text)["src_url"]
+print "image url:", image_url
+ 
+r = requests.get(image_url, headers = headers)
+assert(r.status_code == 200)
+print "origin image len:", len(data), "image len:", len(r.content)

@@ -12,6 +12,7 @@ import config
 import user
 import authorization
 import download
+import image
 
 app = Flask(__name__)
 app.debug = True
@@ -24,6 +25,7 @@ authorization.rds = rds
 app.register_blueprint(auth.app)
 app.register_blueprint(user.app)
 app.register_blueprint(download.app)
+app.register_blueprint(image.app)
 
 def init_logger(logger):
     root = logger
@@ -46,6 +48,9 @@ else:
     config.APP_ID = config.BAUHINIA_APP_ID
     config.APP_KEY = config.BAUHINIA_APP_KEY
     config.APP_SECRET = config.BAUHINIA_APP_SECRET
+
+if not os.path.exists(config.IMAGE_PATH):
+    os.makedirs(config.IMAGE_PATH)
 
 
 if __name__ == '__main__':
