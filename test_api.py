@@ -1,3 +1,5 @@
+# -*- coding: utf-8 -*-
+
 import requests
 import urllib
 import urllib2
@@ -57,7 +59,16 @@ headers["Authorization"] = "Bearer " + access_token
 values = {"state":"xxxx"}
 data = json.dumps(values)
 r = requests.patch(url, data = data, headers = headers)
-print r.status_code
+print "set user state:", r.status_code
+
+
+url = URL + "/users/me"
+headers = {}
+headers["Authorization"] = "Bearer " + access_token
+values = {"name":"测试"}
+data = json.dumps(values)
+r = requests.patch(url, data = data, headers = headers)
+print "set user name:", r.status_code
  
  
 url = URL + "/users"
@@ -67,7 +78,7 @@ headers["Authorization"] = "Bearer " + access_token
 obj = [{"zone":"86", "number":"13800000009", "name":"test9"},
        {"zone":"86", "number":"13800000001", "name":"test1"}]
 r = requests.post(url, data = json.dumps(obj), headers = headers)
-print r.status_code
+print "upload contact list:", r.status_code
  
 r = requests.get(url, headers = headers)
 print "users:", r.text

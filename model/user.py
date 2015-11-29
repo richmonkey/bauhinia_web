@@ -106,6 +106,9 @@ def get_user_contact_list(rds, uid):
 
     return contacts
         
+def set_user_name(rds, uid, name):
+    key = user_key(uid)
+    rds.hset(key, "name", name)
 
 def set_user_state(rds, uid, state):
     key = user_key(uid)    

@@ -89,5 +89,10 @@ def set_user_property():
         uid = request.uid
         user.set_user_avatar(rds, uid, avatar)
         return ""
+    elif req.has_key("name"):
+        name = req['name']
+        uid = request.uid
+        user.set_user_name(rds, uid, name)
+        return ""
     else:
         return INVALID_PARAM()
