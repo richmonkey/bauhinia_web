@@ -54,6 +54,24 @@ def wait_sweep(sid):
     return e
 
 class QRLogin:
+    def loginSession(self, session, rds):
+        access_token = login_gobelieve(int(session.uid), "", config.BAUHINIA_APP_ID, config.BAUHINIA_APP_SECRET)
+        if not access_token:
+            raise Error(404, "imsdk can't login")
+  
+        tok = create_token(TOKEN_EXPIRE, True)
+        tok['uid'] = int(session.uid)
+        tok["access_token"] = access_token
+        tok["sid"] = session.sid
+        t = token.AccessToken(**tok)
+        t.save(rds)
+  
+        session.expire(rds, TOKEN_EXPIRE)
+  
+        web.setcookie("sid", session.sid, TOKEN_EXPIRE)
+        web.setcookie("token", t.access_token, TOKEN_EXPIRE)
+        return json.dumps(tok)
+        
     def GET(self):
         logging.debug("qrcode login")
         rds = redis.StrictRedis(host=config.REDIS_HOST, port=config.REDIS_PORT, db=config.REDIS_DB)
@@ -68,21 +86,7 @@ class QRLogin:
          
         if session.uid:
             #已经登录
-            access_token = login_gobelieve(int(session.uid), "", config.BAUHINIA_APP_ID, config.BAUHINIA_APP_SECRET)
-            if not access_token:
-                raise Error(404, "imsdk can't login")
-
-            tok = create_token(3600, True)
-            tok['uid'] = int(session.uid)
-            tok["access_token"] = access_token
-            t = token.AccessToken(**tok)
-            t.save(rds)
-
-            session.expire(rds, TOKEN_EXPIRE)
-
-            web.setcookie("sid", sid, TOKEN_EXPIRE)
-            web.setcookie("token", t.access_token, TOKEN_EXPIRE)
-            return json.dumps(tok)
+            return self.loginSession(session, rds)
          
         e = wait_sweep(sid)
         if not e:
@@ -94,22 +98,8 @@ class QRLogin:
             raise Error(404, "sid not found")
          
         if session.uid:
-            #已经登录
-            access_token = login_gobelieve(int(session.uid), "", config.BAUHINIA_APP_ID, config.BAUHINIA_APP_SECRET)
-            if not access_token:
-                raise Error(404, "imsdk can't login")
-
-            tok = create_token(3600, True)
-            tok['uid'] = int(session.uid)
-            tok["access_token"] = access_token
-            t = token.AccessToken(**tok)
-            t.save(rds)
-
-            session.expire(rds, TOKEN_EXPIRE)
-
-            web.setcookie("sid", sid, TOKEN_EXPIRE)
-            web.setcookie("token", t.access_token, TOKEN_EXPIRE)
-            return json.dumps(tok)
+            #登录成功
+            return self.loginSession(session, rds)
 
         logging.warning("session login fail")
         raise Error(400, "timeout")
