@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 from flask import request
 from flask import Flask
 import flask
@@ -44,10 +45,12 @@ if len(sys.argv) > 1 and sys.argv[1] == "face":
     config.APP_ID = config.FACE_APP_ID
     config.APP_KEY = config.FACE_APP_KEY
     config.APP_SECRET = config.FACE_APP_SECRET
+    config.APP_NAME = "电话虫"
 else:
     config.APP_ID = config.BAUHINIA_APP_ID
     config.APP_KEY = config.BAUHINIA_APP_KEY
     config.APP_SECRET = config.BAUHINIA_APP_SECRET
+    config.APP_NAME = "羊蹄甲"
 
 if not os.path.exists(config.IMAGE_PATH):
     os.makedirs(config.IMAGE_PATH)

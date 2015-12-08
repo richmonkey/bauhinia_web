@@ -109,10 +109,7 @@ def is_test_number(number):
         return False
     
 def is_super_number(number):
-    if number == "13635273142":
-        return True
-    else:
-        return False
+    return False
 
 @app.route("/verify_code", methods=["GET", "POST"])
 def verify_code():
@@ -135,13 +132,8 @@ def verify_code():
     if is_super_number(number):
         return make_response(200, data = data)
 
-    pos = request.base_url.find("http://voip")
-    if pos == 0:
-        if not send_sms(number, vc, "电话虫"):
-            return SMS_FAIL()
-    else:
-        if not send_sms(number, vc, "羊蹄甲"):
-            return SMS_FAIL()
+    if not send_sms(number, vc, config.APP_NAME):
+        return SMS_FAIL()
 
     return make_response(200, data = data)
 
