@@ -437,4 +437,20 @@ ul, ol, li {
 @media screen and (min-width: 1200px) {
   .app {
     width: 1118px; } }
+.btn-download {
+  position: absolute;
+  right: 50px;
+  top: 35px;
+  padding: 10px 30px;
+  text-decoration: none;
+  background-color: #fff;
+  cursor: pointer;
+  color: #078496;
+  border-radius: 5px;
+  z-index: 10002; }
 
+.btn-download:hover {
+  background-color: #eee;
+  text-decoration: none; }
+
+/*# sourceMappingURL=style.css.map */
