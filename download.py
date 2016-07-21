@@ -49,7 +49,7 @@ def face_package(is_ios):
     if is_ios:
         return "https://itunes.apple.com/us/app/dian-hua-chong/id939167209?mt=8"
     else:
-        return "http://gdown.baidu.com/data/wisegame/92a7589f8fe0d204/dianhuachong_1.apk"
+        return "http://p.gdown.baidu.com/a1a1c70d6927cb663b0b01bfe7105e475a27ec87047ce1ee860187276e7fead61e1b92e7ce5d055dc58f29b5df2eeb112f2cc0365081f5911dea2c85142c46de373043d4a33cbb2c031f5f4ce3454392488a5eb5c992f3e89b86eb91c530294f3ce0b32fc4ddb0fa22395128b6a542bfe29b45e8b41f1de2466870e2978a7ca0"
 
 @app.route("/download", methods=["GET"])
 def download():
@@ -68,7 +68,7 @@ def face_app_version(is_ios):
         ver["minor"] = 0
     else:
         ver["major"] = 1
-        ver["minor"] = 0
+        ver["minor"] = 5
     return ver
 
 def message_app_version(is_ios):
