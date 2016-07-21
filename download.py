@@ -76,7 +76,7 @@ def message_app_version(is_ios):
     ver["url"] = message_package(is_ios)
     if is_ios:
         ver["major"] = 1
-        ver["minor"] = 0
+        ver["minor"] = 7
     else:
         ver["major"] = 1
         ver["minor"] = 0
