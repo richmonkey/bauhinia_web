@@ -13,6 +13,7 @@ from util import make_response
 from model import code
 from model import token
 from model import user
+from lib import sms
 from authorization import create_token
 from authorization import login_gobelieve
 import config
@@ -68,34 +69,28 @@ def check_verify_rate(zone, number):
 
 
 def send_sms(phone_number, code, app_name):
-    #短信模版1
-    content = "尊敬的用户,您的注册验证码是%s,感谢您使用%s！"%(code, app_name)
+    accountSid = config.UC_ACCOUNT_SID
+    accountToken = config.UC_ACCOUNT_TOKEN
+    appId = config.UC_APPID
+    templateId = config.UC_TEMPLATE_ID
 
-    param = {}
-    param["k"] = "098b460ba826e1f503e50ead09dc5059"
-    param["p"] = "1"
-    param["t"] = phone_number
-    param["c"] = content
-
-    URL = "http://tui3.com/api/send/?"
-    url = URL + urllib.urlencode(param)
-
-    resp = requests.get(url)
-    if resp.status_code != 200:
-        logging.warning("send sms err status code:%d", resp.status_code)
-        return False
-
+    param = "%s,%s"%(code, app_name)
+    print "param:", param, type(param)
     try:
-        obj = json.loads(resp.text)
-        if obj["err_code"] != 0:
-            logging.warning("send sms err:%s", resp.text)
+        resp = sms.RestAPI.templateSMS(accountSid,accountToken,appId,phone_number,templateId,param)
+        obj = json.loads(resp)
+        if obj['resp']['respCode'] == "000000":
+            logging.info("send sms success phone:%s code:%s", phone_number, code)
+            return True
+        else:
+            logging.warning("send sms err:%s", resp)
             return False
     except Exception, e:
-        logging.warning("resp:%s exception:%s", resp.text, str(e))
+        logging.warning("exception:%s", str(e))
+        raise
         return False
+        
 
-    logging.info("send sms success phone:%s code:%s", phone_number, code)
-    return True
 
 
 def is_test_number(number):

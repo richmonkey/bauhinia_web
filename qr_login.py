@@ -49,7 +49,7 @@ class Session:
 
 def wait_sweep(sid):
     key = "session_queue_" + sid
-    rds = redis.StrictRedis(host=config.REDIS_HOST, port=config.REDIS_PORT, db=config.REDIS_DB)
+    rds = redis.StrictRedis(host=config.REDIS_HOST, port=config.REDIS_PORT, password=config.REDIS_PASSWORD, db=config.REDIS_DB)
     e = rds.brpop(key, timeout=55)
     return e
 
@@ -74,7 +74,7 @@ class QRLogin:
         
     def GET(self):
         logging.debug("qrcode login")
-        rds = redis.StrictRedis(host=config.REDIS_HOST, port=config.REDIS_PORT, db=config.REDIS_DB)
+        rds = redis.StrictRedis(host=config.REDIS_HOST, port=config.REDIS_PORT, password=config.REDIS_PASSWORD, db=config.REDIS_DB)
         sid = web.input().sid
         session = Session()
         session.sid = sid

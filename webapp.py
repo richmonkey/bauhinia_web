@@ -16,7 +16,7 @@ import sys
 from error import Error
 from authorization import web_requires_auth
 
-rds = redis.StrictRedis(host=config.REDIS_HOST, port=config.REDIS_PORT, db=config.REDIS_DB)
+rds = redis.StrictRedis(host=config.REDIS_HOST, port=config.REDIS_PORT, password=config.REDIS_PASSWORD, db=config.REDIS_DB)
 authorization.rds = rds
 
 
