@@ -3,5 +3,5 @@
 .DS_Store
 *.pem
 .idea/
-config.py
+/config.py
 /*.sh
