@@ -75,7 +75,6 @@ def send_sms(phone_number, code, app_name):
     templateId = config.UC_TEMPLATE_ID
 
     param = "%s,%s"%(code, app_name)
-    print "param:", param, type(param)
     try:
         resp = sms.RestAPI.templateSMS(accountSid,accountToken,appId,phone_number,templateId,param)
         obj = json.loads(resp)
@@ -87,11 +86,7 @@ def send_sms(phone_number, code, app_name):
             return False
     except Exception, e:
         logging.warning("exception:%s", str(e))
-        raise
         return False
-        
-
-
 
 def is_test_number(number):
     if number == "13800000000" or number == "13800000001" or \
