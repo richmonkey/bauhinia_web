@@ -49,7 +49,7 @@ def face_package(is_ios):
     if is_ios:
         return "https://itunes.apple.com/us/app/dian-hua-chong/id939167209?mt=8"
     else:
-        return "http://p.gdown.baidu.com/a1a1c70d6927cb663b0b01bfe7105e475a27ec87047ce1ee860187276e7fead61e1b92e7ce5d055dc58f29b5df2eeb112f2cc0365081f5911dea2c85142c46de373043d4a33cbb2c031f5f4ce3454392488a5eb5c992f3e89b86eb91c530294f3ce0b32fc4ddb0fa22395128b6a542bfe29b45e8b41f1de2466870e2978a7ca0"
+        return "http://p.gdown.baidu.com/1fc0b0a34ec86ac7f23e55b872f8ee6b086bb7f8ee57cf4f0d6b4115fcd52c748d6702952ed6850616395678ec67d58b33b5e725efe28db2ddf428ff848004e638fbe7c95b309bcb3c1e0f9b71e0b01ed8efe516cd86cf22ae00e3758ae8e06d7123b3e82b2a697b18cbfa319b2cab1f0f9bee94c225f2094bbcfc1f4a9e56276935b93f2c6f588d0169939b2aae94f2b0a34e375ecd8d4bacfef5f9a1cc12c1dc4ee305c8b8f2ed1e5b459bf94251816ffa8046e0df8fab20d0fc03f73757642c571e97bbcce9a012b8e0cbeed49e2e44996161e4e894097d6707d8863a1778ed54285e89d9b1c661b88a5c092a30a7669ecb915395858e13809f8c37646b6b213b26aeb56530c22454f1c3e513af12d4851adc5ab24e735a15120820137c199ddab2e6295d95e84a151479856024b6a668d0ceaa23778bbb2635dff1d62eabe6ae35164a4c442a9303a8383beba488"
 
 @app.route("/download", methods=["GET"])
 def download():
@@ -68,7 +68,7 @@ def face_app_version(is_ios):
         ver["minor"] = 0
     else:
         ver["major"] = 1
-        ver["minor"] = 5
+        ver["minor"] = 6
     return ver
 
 def message_app_version(is_ios):
