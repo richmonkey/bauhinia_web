@@ -12,7 +12,7 @@ import threading
 import json
 import sys
 
-#URL = "http://192.168.33.10"
+#URL = "http://192.168.33.10:6000"
 URL = "http://dev.gobelieve.io"
 
 url = URL + "/verify_code?"
@@ -126,3 +126,14 @@ print "image url:", image_url
 r = requests.get(image_url, headers = headers)
 assert(r.status_code == 200)
 print "origin image len:", len(data), "image len:", len(r.content)
+
+
+headers = {}
+headers["Authorization"] = "Bearer " + access_token
+headers["Content-Type"] = "application/json"
+
+url = URL + "/conferences"
+data = json.dumps([13800000000, 13800000003])
+r = requests.post(url, data=data, headers = headers)
+assert(r.status_code == 200)
+print "new conference:", r.content

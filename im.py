@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 from flask import request
 from flask import Flask
+from flask import g
 import flask
 import md5
 import json
@@ -8,25 +9,41 @@ import logging
 import sys
 import os
 import redis
-import auth
-import config
-import user
 import authorization
-import download
-import image
+import config
+
+from views import auth
+from views import user
+from views import download
+from views import image
+from views import conference
 
 app = Flask(__name__)
-app.debug = True
+app.debug = config.DEBUG
 
 rds = redis.StrictRedis(host=config.REDIS_HOST, port=config.REDIS_PORT, password=config.REDIS_PASSWORD, db=config.REDIS_DB)
 auth.rds = rds
 user.rds = rds
 authorization.rds = rds
 
-app.register_blueprint(auth.app)
-app.register_blueprint(user.app)
-app.register_blueprint(download.app)
-app.register_blueprint(image.app)
+
+def before_request():
+    logging.debug("before request")
+    g.rds= rds
+
+def app_teardown(exception):
+    logging.debug('app_teardown')
+
+    
+# 初始化接口
+def init_app(app):
+    app.teardown_appcontext(app_teardown)
+    app.before_request(before_request)    
+    app.register_blueprint(auth.app)
+    app.register_blueprint(user.app)
+    app.register_blueprint(download.app)
+    app.register_blueprint(image.app)
+    app.register_blueprint(conference.app)
 
 def init_logger(logger):
     root = logger
@@ -40,6 +57,7 @@ def init_logger(logger):
 
 log = logging.getLogger('')
 init_logger(log)
+init_app(app)
 
 if len(sys.argv) > 1 and sys.argv[1] == "face":
     config.APP_ID = config.FACE_APP_ID

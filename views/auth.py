@@ -15,7 +15,7 @@ from model import token
 from model import user
 from lib import sms
 from authorization import create_token
-from authorization import login_gobelieve
+from lib import gobelieve
 import config
 
 app = Blueprint('auth', __name__)
@@ -146,7 +146,7 @@ def access_token():
 
     uid = user.make_uid(zone, number)
 
-    access_token = login_gobelieve(uid, "", config.APP_ID, config.APP_SECRET)
+    access_token = gobelieve.login_gobelieve(uid, "")
         
     if not access_token:
         return CAN_NOT_GET_TOKEN()
@@ -184,7 +184,7 @@ def refresh_token():
     if not rt.load(rds, refresh_token):
         return INVALID_REFRESH_TOKEN()
 
-    access_token = login_gobelieve(int(rt.user_id), "", config.APP_ID, config.APP_SECRET)
+    access_token = gobelieve.login_gobelieve(int(rt.user_id), "")
         
     if not access_token:
         return CAN_NOT_GET_TOKEN()
