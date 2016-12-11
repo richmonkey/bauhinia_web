@@ -31,7 +31,7 @@ def post_conferences():
     rds = g.rds
     cid = rds.incr("conferences_id")
 
-    uid = request.uid
+    uid = int(request.uid)
     now = int(time.time())
     obj = {"conference":{"id":cid, "initiator":uid, "partipants":partipants, "timestamp":now}}
     content = json.dumps(obj)
