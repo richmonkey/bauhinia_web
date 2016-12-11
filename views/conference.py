@@ -31,8 +31,9 @@ def post_conferences():
     rds = g.rds
     cid = rds.incr("conferences_id")
 
+    uid = request.uid
     now = int(time.time())
-    obj = {"conference":{"id":cid, "partipants":partipants, "timestamp":now}}
+    obj = {"conference":{"id":cid, "initiator":uid, "partipants":partipants, "timestamp":now}}
     content = json.dumps(obj)
     for uid in partipants:
         r = gobelieve.send_system_message(uid, content)
