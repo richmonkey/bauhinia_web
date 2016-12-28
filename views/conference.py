@@ -43,8 +43,10 @@ def post_conferences():
     obj = {"conference":c,
            "push":p}
     content = json.dumps(obj)
-    for uid in partipants:
-        r = gobelieve.send_system_message(uid, content)
+    for pid in partipants:
+        if pid == uid:
+            continue
+        r = gobelieve.send_system_message(pid, content)
         logging.debug("send system message:%s", r)
 
     return make_response(200, {"success":True})
