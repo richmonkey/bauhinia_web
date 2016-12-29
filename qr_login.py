@@ -55,7 +55,7 @@ def wait_sweep(sid):
 
 class QRLogin:
     def loginSession(self, session, rds):
-        access_token = gobelieve.login_gobelieve(int(session.uid), "", config.BAUHINIA_APP_ID, config.BAUHINIA_APP_SECRET)
+        access_token = gobelieve.login_gobelieve(int(session.uid), "")
         if not access_token:
             raise Error(404, "imsdk can't login")
   
