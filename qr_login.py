@@ -115,7 +115,11 @@ log = logging.getLogger('')
 init_logger(log)
 logging.debug("startup")
 
-
+config.APP_ID = config.BAUHINIA_APP_ID
+config.APP_KEY = config.BAUHINIA_APP_KEY
+config.APP_SECRET = config.BAUHINIA_APP_SECRET
+config.APP_NAME = "羊蹄甲"
+    
 application = app.wsgifunc()
 
 if __name__ == "__main__": 
