@@ -40,8 +40,11 @@ def post_conferences():
     }
 
     p = "你的朋友邀请你加入群视频通话"
-    obj = {"conference":c,
-           "push":p}
+    obj = {
+        "conference":c,
+        "push":p,
+        "sound":"apns.caf"
+    }
     content = json.dumps(obj)
     for pid in partipants:
         if pid == uid:
@@ -75,8 +78,11 @@ def post_call():
         "timestamp":now
     }
     p = "你的朋友请求与你通话"
-    obj = {"voip":c,
-           "push":p}
+    obj = {
+        "voip":c,
+        "push":p,
+        "sound":"apns.caf"
+    }
     content = json.dumps(obj)
 
     r = gobelieve.send_system_message(peer_uid, content)
