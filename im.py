@@ -17,23 +17,36 @@ from views import user
 from views import download
 from views import image
 from views import conference
+from views import friend
+
+from lib.mysql import Mysql
+
 
 app = Flask(__name__)
 app.debug = config.DEBUG
 
 rds = redis.StrictRedis(host=config.REDIS_HOST, port=config.REDIS_PORT, password=config.REDIS_PASSWORD, db=config.REDIS_DB)
-auth.rds = rds
-user.rds = rds
-authorization.rds = rds
+
 
 
 def before_request():
     logging.debug("before request")
     g.rds= rds
 
+    cnf = config.MYSQL
+    db = getattr(g, '_db', None)
+    if db is None:
+        g._db = Mysql(*cnf)
+
 def app_teardown(exception):
     logging.debug('app_teardown')
-
+    # 捕获teardown时的mysql异常
+    try:
+        db = getattr(g, '_db', None)
+        if db:
+            db.close()
+    except Exception:
+        pass
     
 # 初始化接口
 def init_app(app):
@@ -44,7 +57,8 @@ def init_app(app):
     app.register_blueprint(download.app)
     app.register_blueprint(image.app)
     app.register_blueprint(conference.app)
-
+    app.register_blueprint(friend.app)
+    
 def init_logger(logger):
     root = logger
     root.setLevel(logging.DEBUG)

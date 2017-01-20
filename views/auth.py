@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-from flask import request, Blueprint
+from flask import request, Blueprint, g
 import random
 import json
 import time
@@ -9,17 +9,20 @@ import logging
 import base64
 from datetime import datetime
 from functools import wraps
+
 from util import make_response
 from model import code
 from model import token
+from model.token import Token
 from model import user
+
+from authorization import random_token_generator
 from lib import sms
-from authorization import create_token
 from lib import gobelieve
 import config
 
 app = Blueprint('auth', __name__)
-rds = None
+
 
 
 def OVERFLOW():
@@ -57,7 +60,7 @@ def CAN_NOT_GET_TOKEN():
 def create_verify_code():
     return ''.join([str(random.randint(0, 9)) for _ in range(6)])
 
-def check_verify_rate(zone, number):
+def check_verify_rate(rds, zone, number):
     now = int(time.time())
     _, ts, count = code.get_verify_code(rds, zone, number)
     if count > 10 and now - ts > 30*60:
@@ -106,11 +109,11 @@ def verify_code():
     zone = request.args.get("zone", "")
     number = request.args.get("number", "")
     logging.info("zone:%s number:%s", zone, number)
-    if not is_test_number(number) and not check_verify_rate(zone, number):
+    if not is_test_number(number) and not check_verify_rate(g.rds, zone, number):
         return OVERFLOW()
         
     vc = create_verify_code()
-    code.set_verify_code(rds, zone, number, vc)
+    code.set_verify_code(g.rds, zone, number, vc)
     data = {}
     if True:#debug
         data["code"] = vc
@@ -140,7 +143,7 @@ def access_token():
     if is_test_number(number):
         pass
     else:
-        c2, timestamp, _ = code.get_verify_code(rds, zone, number)
+        c2, timestamp, _ = code.get_verify_code(g.rds, zone, number)
         if c1 != c2:
             return INVALID_CODE()
 
@@ -151,7 +154,7 @@ def access_token():
     if not access_token:
         return CAN_NOT_GET_TOKEN()
 
-    u0 = user.get_user(rds, uid)
+    u0 = user.get_user(g.rds, uid)
     u = user.User()
     u.uid = uid
     if u0 is None:
@@ -159,44 +162,49 @@ def access_token():
     else:
         u.state = u0.state
 
-    user.save_user(rds, u)
+    user.save_user(g.rds, u)
 
-    tok = create_token(3600, True)
-    tok['uid'] = uid
-    tok['access_token'] = access_token
+    tok = {
+        'expires_in': 3600,
+        'token_type': 'Bearer',
+        "access_token":access_token,
+        "refresh_token":random_token_generator(),
+        'uid':int(uid)
+    }
 
-    t = token.AccessToken(**tok)
-    t.save(rds)
-    t = token.RefreshToken(**tok)
-    t.save(rds)
-
+    Token.save_access_token(g.rds, access_token, uid, 3600)
+    Token.save_refresh_token(g.rds, tok['refresh_token'], uid)
+    
     return make_response(200, tok)
 
 
 @app.route("/auth/refresh_token", methods=["POST"])
 def refresh_token():
+    rds = g.rds
     if not request.data:
         return INVALID_PARAM()
 
     obj = json.loads(request.data)
     refresh_token = obj["refresh_token"]
-    rt = token.RefreshToken()
-    if not rt.load(rds, refresh_token):
+
+    uid = Token.load_refresh_token(rds, refresh_token)
+    if not uid:
         return INVALID_REFRESH_TOKEN()
 
-    access_token = gobelieve.login_gobelieve(int(rt.user_id), "")
+    access_token = gobelieve.login_gobelieve(int(uid), "")
         
     if not access_token:
         return CAN_NOT_GET_TOKEN()
 
-    tok = create_token(3600, False)
-    tok["refresh_token"] = obj["refresh_token"]
-    tok["access_token"] = access_token
-    tok['uid'] = rt.user_id
+    tok = {
+        'expires_in': 3600,
+        'token_type': 'Bearer',
+        "access_token":access_token,
+        "refresh_token":obj["refresh_token"],
+        'uid':int(uid)
+    }
 
-    t = token.AccessToken(**tok)
-    t.user_id = rt.user_id
-    t.save(rds)
+    Token.save_access_token(g.rds, access_token, uid, 3600)
     
     return make_response(200, tok)
 

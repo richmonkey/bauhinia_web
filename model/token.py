@@ -7,7 +7,37 @@ def access_token_key(token):
 def refresh_token_key(token):
     return "refresh_token_" + token
 
+class Token(object):
+    @classmethod
+    def save_access_token(cls, rds, access_token, uid, expires_in):
+        expires = int(time.time()) + expires_in
+        key = access_token_key(access_token)
+        pipe = rds.pipeline()
+        m = {
+            "expires":expires,
+            "user_id":uid,
+        }
+        pipe.hmset(key, m)
+        pipe.expireat(key, expires)
+        pipe.execute()
+        
+    @classmethod
+    def save_refresh_token(cls, rds, refresh_token, uid):
+        key = refresh_token_key(refresh_token)
+        rds.hset(key, "user_id", uid)
 
+
+    @classmethod
+    def load_access_token(cls, rds, access_token):
+        key = access_token_key(access_token)
+        return rds.hmget(key, "user_id", "expires")
+
+    @classmethod
+    def load_refresh_token(cls, rds, refresh_token):
+        key = refresh_token_key(refresh_token)
+        return rds.hget(key, "user_id")
+
+    
 class AccessToken(object):
     def __init__(self, **kwargs):
         if kwargs.has_key('expires_in'):

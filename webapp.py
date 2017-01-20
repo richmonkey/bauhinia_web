@@ -8,7 +8,6 @@ import uuid
 import json
 import redis
 import authorization
-from authorization import create_token
 from model import token
 import config
 import logging

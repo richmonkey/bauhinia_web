@@ -14,48 +14,209 @@ import sys
 
 #URL = "http://192.168.33.10:6000"
 URL = "http://dev.gobelieve.io"
+access_token = ""
 
-
-url = URL + "/verify_code?"
-NUMBER = "13800000000"
-values = {'zone' : '86', 'number' : NUMBER}
-params = urllib.urlencode(values) 
-url += params
-
-r = requests.post(url)
-print r.content
-resp = json.loads(r.content)
-
-code = resp["code"]
-url = URL + "/auth/token"
-values = {"zone":"86", "number":NUMBER, "code":code}
-data = json.dumps(values)
-r = requests.post(url, data=data)
-print r.content
-resp = json.loads(r.content)
-
-print "access token:", resp["access_token"]
-print "refresh token:", resp["refresh_token"]
-access_token = resp["access_token"]
-refresh_token = resp["refresh_token"]
-
-url = URL + "/auth/refresh_token"
-headers = {}
-headers["Authorization"] = "Bearer " + access_token
- 
-values = {"refresh_token":refresh_token}
-data = json.dumps(values)
-r = requests.post(url, data=data, headers = headers)
-print r.content
-resp = json.loads(r.content)
- 
-print "access token:", resp["access_token"]
-print "refresh token:", resp["refresh_token"]
-access_token = resp["access_token"]
-refresh_token = resp["refresh_token"]
 
     
+def LoginUser():
+    url = URL + "/verify_code?"
+    NUMBER = "13800000000"
+    values = {'zone' : '86', 'number' : NUMBER}
+    params = urllib.urlencode(values) 
+    url += params
+     
+    r = requests.post(url)
+    print r.content
+    resp = json.loads(r.content)
+    code = resp["code"]
 
+    url = URL + "/users/register"
+    headers = {"Content-Type":"application/json"}
+    
+    values = {
+        "nickname":"测试1",
+        "password":"111111",
+        "country_code":"86",
+        "number":"13800000000",
+        "code":code
+    }
+    data = json.dumps(values)
+    r = requests.post(url, data = data, headers = headers)
+    print "register:", r.status_code, r.content
+
+    url = URL + "/users/login"
+    headers = {"Content-Type":"application/json"}
+    values = {
+        "password":"111111",
+        "country_code":"86",
+        "number":"13800000000"
+    }
+    r = requests.post(url, data = data, headers = headers)
+    print "login:", r.status_code, r.content
+
+    return json.loads(r.content)['access_token']
+
+
+    
+def TestAcceptFriend():
+    url = URL + "/users/login"
+    headers = {"Content-Type":"application/json"}
+    values = {
+        "password":"111111",
+        "country_code":"86",
+        "number":"13800000000"
+    }
+    data = json.dumps(values)
+    r = requests.post(url, data = data, headers = headers)
+    print "login:", r.status_code, r.content
+    resp0 = json.loads(r.content)
+
+    
+    url = URL + "/users/login"
+    headers = {"Content-Type":"application/json"}
+    values = {
+        "password":"111111",
+        "country_code":"86",
+        "number":"13800000001"
+    }
+    data = json.dumps(values)
+    r = requests.post(url, data = data, headers = headers)
+    print "login:", r.status_code, r.content
+    resp1 = json.loads(r.content)
+
+    
+    url = URL + "/friends/request"
+    headers = {
+        "Content-Type": "application/json",
+        "Authorization": "Bearer " + resp0['access_token']
+    }
+    #13800000000 -> 13800000001
+    values = {"friend_uid":resp1['uid']}
+    data = json.dumps(values)
+    r = requests.post(url, data = data, headers = headers)
+    print "request friend:", r.status_code, r.content
+
+    request_id = json.loads(r.content)['request_id']
+
+
+    url = URL + "/friends/accept"
+    headers = {
+        "Content-Type": "application/json",
+        "Authorization": "Bearer " + resp1['access_token']
+    }
+
+    values = {"uid":resp0['uid'], "request_id":request_id}
+    data = json.dumps(values)
+    r = requests.post(url, data = data, headers = headers)
+    print "accept friend:", r.status_code, r.content
+
+
+    #解除好友关系
+    url = URL + "/friends/" + str(resp1['uid'])
+    headers = {
+        "Content-Type": "application/json",
+        "Authorization": "Bearer " + resp0['access_token']
+    }
+    r = requests.delete(url, headers = headers)
+    print "delete friend:", r.status_code, r.content
+
+
+def TestRejectFriend():
+    url = URL + "/users/login"
+    headers = {"Content-Type":"application/json"}
+    values = {
+        "password":"111111",
+        "country_code":"86",
+        "number":"13800000000"
+    }
+    data = json.dumps(values)
+    r = requests.post(url, data = data, headers = headers)
+    print "login:", r.status_code, r.content
+    resp0 = json.loads(r.content)
+
+    
+    url = URL + "/users/login"
+    headers = {"Content-Type":"application/json"}
+    values = {
+        "password":"111111",
+        "country_code":"86",
+        "number":"13800000001"
+    }
+    data = json.dumps(values)
+    r = requests.post(url, data = data, headers = headers)
+    print "login:", r.status_code, r.content
+    resp1 = json.loads(r.content)
+
+    
+    url = URL + "/friends/request"
+    headers = {
+        "Content-Type": "application/json",
+        "Authorization": "Bearer " + resp0['access_token']
+    }
+    #13800000000 -> 13800000001
+    values = {"friend_uid":resp1['uid']}
+    data = json.dumps(values)
+    r = requests.post(url, data = data, headers = headers)
+    print "request friend:", r.status_code, r.content
+
+    request_id = json.loads(r.content)['request_id']
+
+
+    url = URL + "/friends/reject"
+    headers = {
+        "Content-Type": "application/json",
+        "Authorization": "Bearer " + resp1['access_token']
+    }
+
+    values = {"uid":resp0['uid'], "request_id":request_id}
+    data = json.dumps(values)
+    r = requests.post(url, data = data, headers = headers)
+    print "reject friend:", r.status_code, r.content
+    
+    
+
+
+def LoginNumber():
+    url = URL + "/verify_code?"
+    NUMBER = "13800000000"
+    values = {'zone' : '86', 'number' : NUMBER}
+    params = urllib.urlencode(values) 
+    url += params
+     
+    r = requests.post(url)
+    print r.content
+    resp = json.loads(r.content)
+     
+    code = resp["code"]
+    url = URL + "/auth/token"
+    values = {"zone":"86", "number":NUMBER, "code":code}
+    data = json.dumps(values)
+    r = requests.post(url, data=data)
+    print r.content
+    resp = json.loads(r.content)
+     
+    print "access token:", resp["access_token"]
+    print "refresh token:", resp["refresh_token"]
+    access_token = resp["access_token"]
+    refresh_token = resp["refresh_token"]
+     
+    url = URL + "/auth/refresh_token"
+    headers = {}
+    headers["Authorization"] = "Bearer " + access_token
+     
+    values = {"refresh_token":refresh_token}
+    data = json.dumps(values)
+    r = requests.post(url, data=data, headers = headers)
+    print r.content
+    resp = json.loads(r.content)
+     
+    print "access token:", resp["access_token"]
+    print "refresh token:", resp["refresh_token"]
+    access_token = resp["access_token"]
+    refresh_token = resp["refresh_token"]
+
+    return access_token    
+    
 def TestUser():
     url = URL + "/users/me"
     headers = {}
@@ -87,8 +248,7 @@ def TestUser():
     r = requests.get(url, headers = headers)
     print "users:", r.text
 
-
-
+    
 #二维码登录    
 def TestQRCode():
     url = URL + "/qrcode/session"
@@ -157,8 +317,12 @@ def TestVOIP():
     assert(r.status_code == 200)
     print "new call:", r.content
 
-
+access_token = LoginNumber()
 TestUser()
 TestVOIP()
 TestQRCode()
 TestImage()
+
+access_token = LoginUser()
+TestAcceptFriend()
+TestRejectFriend()

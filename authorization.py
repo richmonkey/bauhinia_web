@@ -1,8 +1,8 @@
 # -*- coding: utf-8 -*-
 
-from flask import request
+from flask import request, g
 from functools import wraps
-from model import token
+from model.token import Token
 from util import make_response
 import logging
 import random
@@ -14,7 +14,9 @@ import md5
 import requests
 import config
 
+#webpy 框架使用
 rds = None
+
 
 def INVALID_ACCESS_TOKEN():
     e = {"error":"非法的access token"}
@@ -33,13 +35,16 @@ def require_auth(f):
             tok = request.headers.get('Authorization')[7:]
         else:
             return INVALID_ACCESS_TOKEN()
-        t = token.AccessToken()
-        if not t.load(rds, tok):
+
+        uid, expires = Token.load_access_token(g.rds, tok)
+        uid = int(uid) if uid else 0
+        expires = int(expires) if expires else 0
+        if not uid:
             return INVALID_ACCESS_TOKEN()
-        if time.time() > t.expires:
-            print t.expires, time.time()
+        if time.time() > expires:
+            logging.debug("access token expire")
             return EXPIRE_ACCESS_TOKEN()
-        request.uid = t.user_id
+        request.uid = uid
         return f(*args, **kwargs)
     return wrapper
   
@@ -48,17 +53,20 @@ def web_requires_auth(f):
     def decorated(*args, **kwargs):        
         auth = web.ctx.env['HTTP_AUTHORIZATION'] if 'HTTP_AUTHORIZATION' in  web.ctx.env else None
         unauth = True
+        uid = 0
         if len(auth) > 7 and auth[:7] == "Bearer ":
             tok = auth[7:]
-            t = token.AccessToken()
-            if t.load(rds, tok) and time.time() < t.expires:
+            uid, expires = Token.load_access_token(rds, tok)
+            uid = int(uid) if uid else 0
+            expires = int(expires) if expires else 0
+            if uid and time.time() < expires:
                 unauth = False
 
         if unauth :
             web.ctx.status = '401 Unauthorized'
             return Unauthorized()
 
-        web.ctx.uid = t.user_id
+        web.ctx.uid = uid
         return f(*args, **kwargs)
     
     return decorated
@@ -81,16 +89,3 @@ UNICODE_ASCII_CHARACTER_SET = ('abcdefghijklmnopqrstuvwxyz'
 def random_token_generator(length=30, chars=UNICODE_ASCII_CHARACTER_SET):
     rand = random.SystemRandom()
     return ''.join(rand.choice(chars) for x in range(length))
-
-def create_token(expires_in, refresh_token=False):
-    """Create a BearerToken, by default without refresh token."""
-
-    token = {
-        'access_token': random_token_generator(),
-        'expires_in': expires_in,
-        'token_type': 'Bearer',
-    }
-    if refresh_token:
-        token['refresh_token'] = random_token_generator()
-
-    return token

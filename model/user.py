@@ -8,7 +8,7 @@ class Contact:
     def from_string(self, s):
         self.uid, self.name = s.split("_", 1)
         
-class User:
+class User(object):
     def __init__(self):
         self.uid = None
         self.state = None
@@ -18,6 +18,30 @@ class User:
         self.ng_device_token = None
         self.face_apns_device_token = None
         self.face_ng_device_token = None
+
+
+
+
+#mysql engine
+class DBUser(User):
+    @classmethod
+    def add_user(cls, db, name, password, number):
+        sql = "INSERT INTO user(nickname, password, number) VALUES(%s, %s, %s)"
+        r = db.execute(sql, (name, password, number))
+        return r.lastrowid
+    
+    @classmethod
+    def get_user(cls, db, number):
+        sql = "SELECT id, password, nickname, avatar, state FROM user WHERE number=%s"
+        r = db.execute(sql, (number,))
+        return r.fetchone()
+
+    @classmethod
+    def save_user(cls, db, uid, name, password):
+        sql = "UPDATE user SET nickname=%s, password=%s WHERE id=%s"
+        r = db.execute(sql, (name, password, uid))
+        return r.rowcount
+
 
 def user_key(uid):
     return "users_" + str(uid)

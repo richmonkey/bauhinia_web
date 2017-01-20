@@ -6,10 +6,9 @@ monkey.patch_socket()
 import web
 import json
 import redis
-import authorization
-from authorization import create_token
 from lib import gobelieve
-from model import token
+from model.token import Token
+from authorization import random_token_generator
 import config
 import logging
 import sys
@@ -58,18 +57,20 @@ class QRLogin:
         access_token = gobelieve.login_gobelieve(int(session.uid), "")
         if not access_token:
             raise Error(404, "imsdk can't login")
-  
-        tok = create_token(TOKEN_EXPIRE, True)
-        tok['uid'] = int(session.uid)
-        tok["access_token"] = access_token
-        tok["sid"] = session.sid
-        t = token.AccessToken(**tok)
-        t.save(rds)
-  
+
+        tok = {
+            'expires_in': TOKEN_EXPIRE,
+            'token_type': 'Bearer',
+            "access_token":access_token,
+            "refresh_token":random_token_generator(),
+            'uid':int(session.uid),
+            'sid':session.sid
+        }        
+        Token.save_access_token(rds, access_token, int(session.uid), TOKEN_EXPIRE)
         session.expire(rds, TOKEN_EXPIRE)
-  
+        
         web.setcookie("sid", session.sid, TOKEN_EXPIRE)
-        web.setcookie("token", t.access_token, TOKEN_EXPIRE)
+        web.setcookie("token", access_token, TOKEN_EXPIRE)
         return json.dumps(tok)
         
     def GET(self):
@@ -123,4 +124,4 @@ config.APP_NAME = "羊蹄甲"
 application = app.wsgifunc()
 
 if __name__ == "__main__": 
-    app.run()      
+    app.run()
