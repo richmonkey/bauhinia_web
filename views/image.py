@@ -19,6 +19,34 @@ def image_ext(content_type):
     else:
         return ""
 
+    
+@app.route("/v2/images", methods=['POST'])
+@require_auth
+def upload_form_image():
+    if 'file' not in request.files:
+        return make_response(400)
+    
+    f = request.files['file']
+    content_type = f.headers["Content-Type"] if f.headers.has_key("Content-Type") else ""
+    ext = image_ext(content_type)
+    if not ext:
+        return make_response(400, {"error":"can't get image extenstion"})
+
+    data = f.read()
+    if not data:
+        return make_response(400, {"error":"data is null"})
+
+    name = md5.new(data).hexdigest()
+    path = os.path.join(config.IMAGE_PATH, name + ext)
+    
+    with open(path, "wb") as f:
+        f.write(data)
+    url = request.url_root + "images/" + name + ext
+    src = "/images/" + name + ext
+    obj = {"src":src, "src_url":url}
+    return make_response(200, data=obj)
+
+
 @app.route('/images', methods=['POST'])
 @require_auth
 def upload_image():
