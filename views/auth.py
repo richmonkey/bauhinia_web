@@ -169,7 +169,9 @@ def access_token():
         'token_type': 'Bearer',
         "access_token":access_token,
         "refresh_token":random_token_generator(),
-        'uid':int(uid)
+        'uid':int(uid),
+        "name":u0.name,
+        "avatar":u0.avatar,
     }
 
     Token.save_access_token(g.rds, access_token, uid, 3600)

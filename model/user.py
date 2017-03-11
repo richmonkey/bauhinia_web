@@ -49,9 +49,10 @@ def user_key(uid):
 def get_user(rds, uid):
     u = User()
     key = user_key(uid)
-    u.state, u.avatar, u.apns_device_token, u.ng_device_token, u.up_timestamp, \
+    u.state, u.name, u.avatar, u.apns_device_token, \
+        u.ng_device_token, u.up_timestamp, \
         u.face_apns_device_token, u.face_ng_device_token \
-        = rds.hmget(key, "state", "avatar", "apns_device_token", \
+        = rds.hmget(key, "state", "name", "avatar", "apns_device_token", \
                     "ng_device_token", "up_timestamp", \
                     "face_apns_device_token", "face_ng_device_token")
     if u.state is None and u.avatar is None and \
@@ -64,6 +65,11 @@ def get_user(rds, uid):
     u.uid = uid
     if u.up_timestamp:
         u.up_timestamp = int(u.up_timestamp)
+    if u.avatar is None:
+        u.avatar = ""
+    if u.name is None:
+        u.name = ""
+        
     return u
 
 def save_user(rds, user):
